@@ -3,23 +3,37 @@ package main
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
-	"log"
+	"regexp"
 )
 
-func CrawlUrl(link string) {
+func CrawlUrl(link string) string {
 	client := resty.New()
 
 	resp, err := client.R().Get(link)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
-	fmt.Println("status", resp.Status())
+	if resp.StatusCode() != 200 {
+		fmt.Println("status", resp.Status())
+	}
+
 	res := string(resp.Body())
 	fmt.Println(res)
+	return res
+}
 
+func findLink(html string) []string {
+	//links := make([]string, 0)
+	pattern := `href="([^"]*)"`
+
+	re := regexp.MustCompile(pattern)
+	matches := re.FindAllString(html, -1)
+	fmt.Println(matches)
+	return matches
 }
 
 func Crawl() {
-	CrawlUrl("https://github.com/VuVietDuy")
+	html := CrawlUrl("https://gobyexample.com/")
+	findLink(html)
 }
